@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Videos - AI Offside Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0a0e1a; --secondary: #131a2e; --card-bg: #161d32;
+            --accent: #00e676; --accent-dark: #00c853;
+            --accent-glow: rgba(0,230,118,0.25); --border: #1e2a45;
+            --text: #e2e8f0; --text-muted: #7a8bb5;
+            --danger: #ff5252; --info: #448aff; --warning: #ffd740;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--primary); color: var(--text); }
+        .sidebar { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: var(--secondary); border-right: 1px solid var(--border); padding: 20px 0; z-index: 1000; display: flex; flex-direction: column; }
+        .sidebar-brand { padding: 10px 24px 30px; display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+        .logo-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; }
+        .sidebar-menu { list-style: none; padding: 0; flex: 1; }
+        .sidebar-menu li { margin: 4px 12px; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-muted); text-decoration: none; border-radius: 10px; font-weight: 500; font-size: 0.92rem; transition: all 0.3s; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(0,230,118,0.1); color: var(--accent); }
+        .sidebar-menu a.active { background: rgba(0,230,118,0.15); border-left: 3px solid var(--accent); }
+        .sidebar-menu a i { width: 20px; text-align: center; }
+        .menu-divider { margin: 16px 24px; border-top: 1px solid var(--border); }
+        .menu-label { padding: 8px 28px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--border); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,230,118,0.15); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 700; }
+        .user-name { font-weight: 600; font-size: 0.9rem; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .main-content { margin-left: 260px; padding: 30px; min-height: 100vh; }
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-weight: 700; font-size: 1.7rem; display: flex; align-items: center; gap: 12px; }
+        .page-header h1 i { color: var(--accent); }
+        .page-header p { color: var(--text-muted); margin-top: 4px; }
+        .card-dark { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+
+        /* Filter Bar */
+        .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .filter-bar select, .filter-bar input {
+            background: var(--primary); border: 1.5px solid var(--border);
+            color: var(--text); padding: 10px 16px; border-radius: 10px;
+            font-family: 'Poppins', sans-serif; font-size: 0.88rem;
+            outline: none; transition: all 0.3s;
+        }
+        .filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent); }
+        .filter-bar select option { background: var(--secondary); }
+        .search-box { position: relative; flex: 1; min-width: 200px; }
+        .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .search-box input { padding-left: 40px; width: 100%; }
+
+        /* Table */
+        .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+        .table-custom thead th { background: rgba(0,230,118,0.08); color: var(--accent); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 14px; border: none; }
+        .table-custom thead th:first-child { border-radius: 8px 0 0 8px; }
+        .table-custom thead th:last-child { border-radius: 0 8px 8px 0; }
+        .table-custom tbody tr { background: var(--secondary); transition: all 0.3s; }
+        .table-custom tbody tr:hover { background: rgba(0,230,118,0.04); }
+        .table-custom tbody td { padding: 14px; border: none; vertical-align: middle; font-size: 0.9rem; }
+        .table-custom tbody td:first-child { border-radius: 8px 0 0 8px; }
+        .table-custom tbody td:last-child { border-radius: 0 8px 8px 0; }
+
+        .badge-custom { padding: 5px 12px; border-radius: 20px; font-size: 0.73rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .badge-success { background: rgba(0,230,118,0.12); color: var(--accent); }
+        .badge-processing { background: rgba(68,138,255,0.12); color: var(--info); }
+        .badge-failed { background: rgba(255,82,82,0.12); color: var(--danger); }
+        .badge-pending { background: rgba(255,215,64,0.12); color: var(--warning); }
+
+        .progress-mini { width: 80px; height: 6px; background: var(--primary); border-radius: 6px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+        .progress-mini-fill { height: 100%; background: var(--info); border-radius: 6px; }
+
+        .btn-accent-sm { background: var(--accent); color: var(--primary); border: none; padding: 8px 20px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-accent-sm:hover { background: var(--accent-dark); color: var(--primary); }
+        .btn-icon { width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; text-decoration: none; font-size: 0.85rem; }
+        .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Pagination */
+        .pagination-custom { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0; }
+        .pagination-custom li a { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: var(--secondary); border: 1px solid var(--border); color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: all 0.3s; }
+        .pagination-custom li a:hover { border-color: var(--accent); color: var(--accent); }
+        .pagination-custom li.active a { background: var(--accent); color: var(--primary); border-color: var(--accent); font-weight: 700; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+        .d1 { animation-delay: 0.1s; } .d2 { animation-delay: 0.2s; }
+        @media (max-width: 992px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <a href="Dashboard.html" class="sidebar-brand"><span class="logo-icon"><i class="fas fa-futbol"></i></span><span>Offside AI</span></a>
+        <div class="menu-label">Main Menu</div>
+        <ul class="sidebar-menu">
+            <li><a href="Dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            <li><a href="Upload.html"><i class="fas fa-cloud-upload-alt"></i> Upload Video</a></li>
+            <li><a href="Myvideos.html" class="active"><i class="fas fa-video"></i> My Videos</a></li>
+        </ul>
+        <div class="menu-divider"></div>
+        <div class="menu-label">Admin Panel</div>
+        <ul class="sidebar-menu"><li><a href="Admin_logs.html"><i class="fas fa-chart-line"></i> Analysis Logs</a></li></ul>
+        <div class="menu-divider"></div>
+        <ul class="sidebar-menu">
+            <li><a href="Profile.html"><i class="fas fa-user-circle"></i> My Profile</a></li>
+            <li><a href="Login.html" style="color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+        <div class="sidebar-footer"><div class="user-info"><div class="user-avatar">A</div><div><div class="user-name">Ali Ahmed</div><div class="user-role">User</div></div></div></div>
+    </aside>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-start mb-4 animate d1">
+            <div class="page-header" style="margin-bottom: 0;">
+                <h1><i class="fas fa-video"></i> My Videos</h1>
+                <p>Manage and view your uploaded videos</p>
+            </div>
+            <a href="Upload.html" class="btn-accent-sm"><i class="fas fa-plus"></i> Upload New</a>
+        </div>
+
+        <!-- Filters -->
+        <div class="card-dark mb-4 animate d1">
+            <div class="filter-bar">
+                <select>
+                    <option>All Status</option>
+                    <option>✅ Completed</option>
+                    <option>⏳ Processing</option>
+                    <option>📤 Uploaded</option>
+                    <option>❌ Failed</option>
+                </select>
+                <input type="date" style="width: auto;">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search videos...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card-dark animate d2">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Video Title</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                        <th>Offsides</th>
+                        <th>Upload Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>
+                            <i class="fas fa-film" style="color: var(--accent); margin-right: 6px;"></i>
+                            <strong>MNU vs LIV Highlight</strong>
+                            <br><small class="text-muted">match_clip_01.mp4</small>
+                        </td>
+                        <td class="text-muted">45.2 MB</td>
+                        <td><span class="badge-custom badge-success"><i class="fas fa-check-circle"></i> Completed</span></td>
+                        <td><span style="color: var(--accent);">100%</span></td>
+                        <td><strong style="color: var(--danger);">5</strong></td>
+                        <td class="text-muted">17 Mar 2025<br><small>02:30 PM</small></td>
+                        <td>
+                            <a href="Videodetail.html" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="btn-icon danger" title="Delete" onclick="return confirm('Delete this video?')"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>
+                            <i class="fas fa-film" style="color: var(--accent); margin-right: 6px;"></i>
+                            <strong>Arsenal vs Chelsea</strong>
+                            <br><small class="text-muted">arsenal_chelsea.mp4</small>
+                        </td>
+                        <td class="text-muted">120.5 MB</td>
+                        <td><span class="badge-custom badge-success"><i class="fas fa-check-circle"></i> Completed</span></td>
+                        <td><span style="color: var(--accent);">100%</span></td>
+                        <td><strong style="color: var(--danger);">3</strong></td>
+                        <td class="text-muted">16 Mar 2025<br><small>11:15 AM</small></td>
+                        <td>
+                            <a href="Videodetail.html" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="btn-icon danger" title="Delete"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            <i class="fas fa-film" style="color: var(--accent); margin-right: 6px;"></i>
+                            <strong>World Cup Semi Final</strong>
+                            <br><small class="text-muted">wc_semifinal.mp4</small>
+                        </td>
+                        <td class="text-muted">85.0 MB</td>
+                        <td><span class="badge-custom badge-processing"><i class="fas fa-spinner fa-spin"></i> Processing</span></td>
+                        <td>
+                            <div class="progress-mini"><div class="progress-mini-fill" style="width: 65%;"></div></div>
+                            <small class="text-muted">65%</small>
+                        </td>
+                        <td>-</td>
+                        <td class="text-muted">15 Mar 2025<br><small>09:45 AM</small></td>
+                        <td>
+                            <a href="#" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="btn-icon" title="Cancel"><i class="fas fa-stop"></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>
+                            <i class="fas fa-film" style="color: var(--accent); margin-right: 6px;"></i>
+                            <strong>Training Session</strong>
+                            <br><small class="text-muted">training_vid.mp4</small>
+                        </td>
+                        <td class="text-muted">200.0 MB</td>
+                        <td><span class="badge-custom badge-pending"><i class="fas fa-clock"></i> Uploaded</span></td>
+                        <td><span class="text-muted">0%</span></td>
+                        <td>-</td>
+                        <td class="text-muted">14 Mar 2025<br><small>04:20 PM</small></td>
+                        <td>
+                            <a href="#" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="btn-icon danger" title="Delete"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>
+                            <i class="fas fa-film" style="color: var(--accent); margin-right: 6px;"></i>
+                            <strong>Test Video Clip</strong>
+                            <br><small class="text-muted">test_clip.mp4</small>
+                        </td>
+                        <td class="text-muted">30.1 MB</td>
+                        <td><span class="badge-custom badge-failed"><i class="fas fa-times-circle"></i> Failed</span></td>
+                        <td><span class="text-muted">-</span></td>
+                        <td>-</td>
+                        <td class="text-muted">13 Mar 2025<br><small>01:10 PM</small></td>
+                        <td>
+                            <a href="#" class="btn-icon" title="Retry"><i class="fas fa-redo"></i></a>
+                            <a href="#" class="btn-icon danger" title="Delete"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <span class="text-muted" style="font-size: 0.85rem;">Showing 1-5 of 12 videos</span>
+                <ul class="pagination-custom">
+                    <li><a href="#"><i class="fas fa-chevron-left"></i></a></li>
+                    <li class="active"><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

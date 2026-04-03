@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - AI Offside Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0a0e1a; --secondary: #131a2e; --card-bg: #161d32; --accent: #00e676; --accent-dark: #00c853; --accent-glow: rgba(0,230,118,0.25); --border: #1e2a45; --text: #e2e8f0; --text-muted: #7a8bb5; --danger: #ff5252; --info: #448aff; --warning: #ffd740; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--primary); color: var(--text); }
+        .sidebar { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: var(--secondary); border-right: 1px solid var(--border); padding: 20px 0; z-index: 1000; display: flex; flex-direction: column; }
+        .sidebar-brand { padding: 10px 24px 30px; display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+        .logo-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; }
+        .sidebar-menu { list-style: none; padding: 0; flex: 1; }
+        .sidebar-menu li { margin: 4px 12px; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-muted); text-decoration: none; border-radius: 10px; font-weight: 500; font-size: 0.92rem; transition: all 0.3s; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(0,230,118,0.1); color: var(--accent); }
+        .sidebar-menu a.active { background: rgba(0,230,118,0.15); border-left: 3px solid var(--accent); }
+        .sidebar-menu a i { width: 20px; text-align: center; }
+        .menu-divider { margin: 16px 24px; border-top: 1px solid var(--border); }
+        .menu-label { padding: 8px 28px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--border); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar-sidebar { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,230,118,0.15); display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 700; }
+        .main-content { margin-left: 260px; padding: 30px; min-height: 100vh; }
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-weight: 700; font-size: 1.7rem; display: flex; align-items: center; gap: 12px; }
+        .page-header h1 i { color: var(--accent); }
+        .page-header p { color: var(--text-muted); margin-top: 4px; }
+        .card-dark { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+        .section-title { font-weight: 600; font-size: 1rem; color: var(--accent); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 8px; }
+        .form-label-custom { color: var(--text-muted); font-weight: 500; font-size: 0.88rem; margin-bottom: 8px; display: block; }
+        .input-wrapper { position: relative; margin-bottom: 18px; }
+        .input-wrapper i.icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; z-index: 2; }
+        .input-wrapper input { width: 100%; background: var(--primary); border: 1.5px solid var(--border); color: var(--text); padding: 13px 16px 13px 44px; border-radius: 12px; font-size: 0.92rem; font-family: 'Poppins', sans-serif; transition: all 0.3s; outline: none; }
+        .input-wrapper input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .input-wrapper input::placeholder { color: var(--text-muted); opacity: 0.6; }
+        .input-wrapper input[readonly] { opacity: 0.5; cursor: not-allowed; }
+        .btn-accent { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: var(--primary); border: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--accent-glow); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); padding: 12px 28px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Profile Avatar */
+        .profile-card { text-align: center; }
+        .profile-avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 42px; color: var(--primary); font-weight: 800;
+            margin: 0 auto 16px; border: 3px solid rgba(0,230,118,0.3);
+        }
+        .profile-card h4 { font-weight: 700; margin-bottom: 4px; }
+        .profile-card .email { color: var(--text-muted); font-size: 0.9rem; }
+        .badge-active { display: inline-block; padding: 4px 14px; border-radius: 20px; background: rgba(0,230,118,0.12); color: var(--accent); font-size: 0.78rem; font-weight: 600; margin-top: 10px; }
+        .profile-stats { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .profile-stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.88rem; }
+        .profile-stat-row .label { color: var(--text-muted); }
+        .profile-stat-row .value { font-weight: 600; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+        .d1 { animation-delay: 0.1s; } .d2 { animation-delay: 0.2s; } .d3 { animation-delay: 0.3s; }
+        @media (max-width: 992px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <a href="Dashboard.html" class="sidebar-brand"><span class="logo-icon"><i class="fas fa-futbol"></i></span><span>Offside AI</span></a>
+        <div class="menu-label">Main Menu</div>
+        <ul class="sidebar-menu">
+            <li><a href="Dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+            <li><a href="Upload.html"><i class="fas fa-cloud-upload-alt"></i> Upload Video</a></li>
+            <li><a href="Myvideos.html"><i class="fas fa-video"></i> My Videos</a></li>
+        </ul>
+        <div class="menu-divider"></div>
+        <div class="menu-label">Admin Panel</div>
+        <ul class="sidebar-menu"><li><a href="Admin_logs.html"><i class="fas fa-chart-line"></i> Analysis Logs</a></li></ul>
+        <div class="menu-divider"></div>
+        <ul class="sidebar-menu">
+            <li><a href="Profile.html" class="active"><i class="fas fa-user-circle"></i> My Profile</a></li>
+            <li><a href="Login.html" style="color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+        <div class="sidebar-footer"><div class="user-info"><div class="user-avatar-sidebar">A</div><div><div style="font-weight: 600; font-size: 0.9rem;">Ali Ahmed</div><div style="font-size: 0.75rem; color: var(--text-muted);">User</div></div></div></div>
+    </aside>
+
+    <div class="main-content">
+        <div class="page-header animate d1">
+            <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+            <p>Manage your account settings and personal information</p>
+        </div>
+
+        <div class="row">
+            <!-- Left: Avatar Card -->
+            <div class="col-lg-4 mb-4">
+                <div class="card-dark profile-card animate d1">
+                    <div class="profile-avatar">A</div>
+                    <h4>Ali Ahmed</h4>
+                    <p class="email">ali.ahmed@email.com</p>
+                    <span class="badge-active"><i class="fas fa-circle" style="font-size: 6px; vertical-align: middle; margin-right: 4px;"></i> Active Account</span>
+
+                    <div class="profile-stats">
+                        <div class="profile-stat-row"><span class="label">Role</span><span class="value">User</span></div>
+                        <div class="profile-stat-row"><span class="label">Member Since</span><span class="value">01 Jan 2025</span></div>
+                        <div class="profile-stat-row"><span class="label">Last Login</span><span class="value">17 Mar 2025</span></div>
+                        <div class="profile-stat-row"><span class="label">Videos Uploaded</span><span class="value">12</span></div>
+                        <div class="profile-stat-row"><span class="label">Total Offsides</span><span class="value">34</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Edit Forms -->
+            <div class="col-lg-8">
+                <!-- Personal Info -->
+                <div class="card-dark mb-4 animate d2">
+                    <div class="section-title"><i class="fas fa-id-card"></i> Personal Information</div>
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Username</label>
+                                <div class="input-wrapper"><input type="text" value="ali_ahmed" readonly><i class="icon fas fa-user"></i></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Email</label>
+                                <div class="input-wrapper"><input type="email" value="ali.ahmed@email.com" readonly><i class="icon fas fa-envelope"></i></div>
+                            </div>
+                        </div>
+                        <label class="form-label-custom">Full Name</label>
+                        <div class="input-wrapper"><input type="text" value="Ali Ahmed" placeholder="Your full name"><i class="icon fas fa-id-badge"></i></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Phone Number</label>
+                                <div class="input-wrapper"><input type="tel" value="0300-1234567" placeholder="Phone"><i class="icon fas fa-phone"></i></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Date of Birth</label>
+                                <div class="input-wrapper"><input type="date" value="2000-05-15"><i class="icon fas fa-calendar"></i></div>
+                            </div>
+                        </div>
+                        <label class="form-label-custom">Address</label>
+                        <div class="input-wrapper"><input type="text" value="Lahore, Pakistan" placeholder="Address"><i class="icon fas fa-map-marker-alt"></i></div>
+                        <button type="button" class="btn-accent"><i class="fas fa-save"></i> Update Profile</button>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="card-dark animate d3">
+                    <div class="section-title"><i class="fas fa-lock"></i> Change Password</div>
+                    <form>
+                        <label class="form-label-custom">Current Password</label>
+                        <div class="input-wrapper"><input type="password" placeholder="Enter current password"><i class="icon fas fa-lock"></i></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">New Password</label>
+                                <div class="input-wrapper"><input type="password" placeholder="Min 6 characters"><i class="icon fas fa-key"></i></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Confirm New Password</label>
+                                <div class="input-wrapper"><input type="password" placeholder="Re-enter password"><i class="icon fas fa-key"></i></div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-outline"><i class="fas fa-key"></i> Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
